@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Alzheimer's Diagnosis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/">
+                    <i class="fas fa-brain"></i>
+                    <span>NeuroCare Diagnostics</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a href="/mri"><i class="fas fa-microscope"></i> MRI Analysis</a>
+                <a href="/clinical"><i class="fas fa-user-md"></i> Clinical Analysis</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Alzheimer's Disease Detection System</h1>
+        <p class="lead">Simple, accurate, and fast detection of Alzheimer's disease using advanced AI technology.</p>
+
+        <!-- Banner Section -->
+        <div class="banner">
+            <div class="video-section">
+                <h3>Understanding Alzheimer's</h3>
+                <video autoplay muted loop class="responsive-video">
+                    <source src="{{ url_for('static', filename='media/ad_video.mp4') }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                  </video>                  
+                <p class="video-description">Learn more about Alzheimer's disease through this informative video.</p>
+            </div>
+        </div>
+
+        <p class="sub-lead">Choose how you'd like to analyze patient data:</p>
+    </section>
+
+    <div class="container">
+        <div class="cards-container">
+            <div class="card mri-card">
+                <h2><i class="fas fa-microscope"></i> MRI Scan Analysis</h2>
+                <p>Upload a brain MRI scan to check for physical changes in the brain that might indicate Alzheimer's disease. This helps identify different stages of dementia.</p>
+                <ul class="explanation">
+                    <li><i class="fas fa-check-circle"></i> Detects brain shrinkage patterns</li>
+                    <li><i class="fas fa-check-circle"></i> Identifies early warning signs</li>
+                    <li><i class="fas fa-check-circle"></i> Shows different stages of Alzheimer's Disease</li>
+                </ul>
+                <a href="/mri" class="btn-primary">Start MRI Analysis</a>
+            </div>
+
+            <div class="card clinical-card">
+                <h2><i class="fas fa-user-md"></i> Clinical Data Analysis</h2>
+                <p>Enter patient information like age, memory test scores, and health history to assess Alzheimer's risk through AI-powered pattern recognition.</p>
+                <ul class="explanation">
+                    <li><i class="fas fa-check-circle"></i> Uses basic health information</li>
+                    <li><i class="fas fa-check-circle"></i> Analyzes memory test results</li>
+                    <li><i class="fas fa-check-circle"></i> Considers family history factors</li>
+                </ul>
+                <a href="/clinical" class="btn-primary">Start Clinical Analysis</a>
+            </div>
+        </div>
+
+       <!-- Add this new section after the existing cards-container -->
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 NeuroCare Diagnostics. All rights reserved.</p>
+        <p>Medical AI Diagnostic System - v1.0</p>
+    </footer>
+</body>
+</html>

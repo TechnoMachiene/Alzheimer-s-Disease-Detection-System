@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MRI Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/home">
+                    <i class="fas fa-brain"></i>
+                    <span>NeuroCare Diagnostics</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a href="/mri" class="active"><i class="fas fa-microscope"></i> MRI Analysis</a>
+                <a href="/clinical"><i class="fas fa-user-md"></i> Clinical Analysis</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>MRI Scan Analysis</h1>
+        <p class="lead">Upload a brain MRI scan to check for signs of Alzheimer's disease.</p>
+    </section>
+
+    <div class="container">
+        <div class="info-box">
+            <h3>What is an MRI Scan?</h3>
+            <p>An MRI (Magnetic Resonance Imaging) scan creates detailed pictures of your brain's structure. Our AI system analyzes these images to look for patterns that might indicate Alzheimer's disease.</p>
+            <div class="two-column">
+                <div>
+                    <h4>What We Look For</h4>
+                    <ul>
+                        <li>Shrinkage in specific brain areas</li>
+                        <li>Changes in brain tissue density</li>
+                        <li>Patterns of brain atrophy</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Why This Matters</h4>
+                    <p>These physical changes often happen years before memory problems start. Early detection helps doctors plan better care.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="mriForm" enctype="multipart/form-data">
+                <div class="file-upload" id="fileDrop">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <span id="fileNameDisplay">Drag & Drop your MRI scan here or click to browse</span>
+                    <input type="file" name="file" accept="image/*" required id="fileInput" style="display:none">
+                </div>
+                <div style="text-align: center; margin-top:1rem;">
+                    <button type="submit"><i class="fas fa-diagnoses"></i> Analyze MRI Scan</button>
+                </div>
+            </form>
+
+            <div id="result" class="result-container" style="margin-top: 2rem;">
+                <h3>Results Explanation</h3>
+                <div id="analysisResults"></div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <button onclick="generateReport()" class="btn-primary">
+                <i class="fas fa-print"></i> Generate & Print Report
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 NeuroCare Diagnostics. All rights reserved.</p>
+        <p>Medical AI Diagnostic System - v1.0</p>
+    </footer>
+
+    <script>
+        const fileDrop = document.getElementById('fileDrop');
+        const fileInput = document.getElementById('fileInput');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+        fileDrop.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', (e) => {
+            const fileName = e.target.files[0]?.name || 'No file selected';
+            fileNameDisplay.textContent = fileName;
+            fileDrop.querySelector('i').className = 'fas fa-file-medical';
+        });
+
+        document.getElementById('mriForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!fileInput.files.length) {
+                document.getElementById('analysisResults').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Please select an MRI scan to analyze
+                    </div>
+                `;
+                return;
+            }
+
+            // Show loading state
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="loading" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <p>Analyzing MRI scan... Please wait</p>
+                </div>
+            `;
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/predict/mri', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('analysisResults').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> ${data.error}
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('analysisResults').innerHTML = `
+                        <div class="result-header">
+                            <div class="result-title">Analysis Results</div>
+                            <div class="result-icon"><i class="fas fa-brain"></i></div>
+                        </div>
+                        <div class="prediction-card">
+                            <div>
+                                <h3>Disease Type: ${data.prediction}</h3>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" style="width: ${(data.confidence * 100).toFixed(0)}%"></div>
+                                </div>
+                                <p>Confidence: ${(data.confidence * 100).toFixed(2)}%</p>
+                                <div class="explanation-box">
+                                    <h4>What This Means</h4>
+                                    <p>${getExplanation(data.prediction)}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        function getExplanation(prediction) {
+            switch(prediction) {
+                case 'Moderate Dementia (AD)':
+                    return "This result suggests more advanced memory loss and cognitive decline. It's important to work closely with doctors to plan care.";
+                case 'Non Dementia (CN)':
+                    return "The scan shows no significant signs of Alzheimer's disease. This is considered a normal brain appearance for the person's age.";
+                case 'Very Mild Dementia (EMCI)':
+                    return "This indicates very early changes in memory and thinking. It's a subtle stage where symptoms may not be obvious in daily life.";
+                case 'Mild Dementia (LMCI)':
+                    return "This suggests mild memory problems that are noticeable but don't yet interfere significantly with daily activities.";
+                default:
+                    return "Please consult with a medical professional for proper interpretation of these results.";
+            }
+        }
+
+        function generateReport() {
+        const analysisResults = document.getElementById('analysisResults').innerHTML;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>MRI Diagnosis Report</title>
+                <style>
+                    body {
+                        font-family: monospace;
+                        color: black;
+                        background: white;
+                        padding: 2rem;
+                    }
+                    .report-header {
+                        text-align: center;
+                        margin-bottom: 2rem;
+                        border-bottom: 2px solid #000;
+                        padding-bottom: 1rem;
+                    }
+                    .doctor-remarks {
+                        margin-top: 2rem;
+                        padding-top: 1rem;
+                        border-top: 1px dashed #000;
+                    }
+                    @media print {
+                        @page { margin: 0.5cm; }
+                        body { font-size: 12pt; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <h1>NeuroCare Diagnostics</h1>
+                    <h2>MRI Analysis Report</h2>
+                    <p>Date: ${new Date().toLocaleDateString()}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>Analysis Results</h3>
+                    ${analysisResults.replace(/<i class="fas fa-spinner fa-spin".*?<\/p>/gs, '')}
+                </div>
+                
+                <div class="doctor-remarks">
+                    <h3>Doctor's Remarks</h3>
+                    <p>________________________________________________________________________</p>
+                    <p>________________________________________________________________________</p>
+                    <p>________________________________________________________________________</p>
+                </div>
+                
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        window.onafterprint = function() {
+                            window.close();
+                        };
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+    </script>
+</body>
+</html>

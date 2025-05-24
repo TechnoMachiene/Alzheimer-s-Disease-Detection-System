@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clinical Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/home">
+                    <i class="fas fa-brain"></i>
+                    <span>NeuroCare Diagnostics</span>
+                </a>
+            </div>
+            <div class="nav-links">
+                <a href="/"><i class="fas fa-home"></i> Home</a>
+                <a href="/mri"><i class="fas fa-microscope"></i> MRI Analysis</a>
+                <a href="/clinical" class="active"><i class="fas fa-user-md"></i> Clinical Analysis</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Clinical Data Analysis</h1>
+        <p class="lead">Enter patient information for Alzheimer's risk assessment.</p>
+    </section>
+
+    <div class="container">
+        <div class="info-box">
+            <h3>Understanding Clinical Analysis</h3>
+            <p>This analysis uses important health information and test results to assess Alzheimer's risk. It looks for patterns in the data that might suggest cognitive decline.</p>
+            <div class="two-column">
+                <div>
+                    <h4>What We Consider</h4>
+                    <ul>
+                        <li>Age and gender</li>
+                        <li>Education level</li>
+                        <li>Memory test scores</li>
+                        <li>Family history indicators</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Why This Matters</h4>
+                    <p>Combining these factors helps identify people at risk for Alzheimer's disease, even before symptoms become obvious.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <form id="clinicalForm">
+                <div class="input-wrapper">
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="age"><i class="fas fa-user-clock"></i> Age (in years)</label>
+                            <span class="info-tooltip" title="Age is an important factor as Alzheimer's risk increases with age"> ℹ </span>
+                        </div>
+                        <input type="number" id="age" required min="40" max="120">
+                    </div>
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                            <span class="info-tooltip" title="Gender can influence Alzheimer's risk patterns"> ℹ </span>
+                        </div>
+                        <select id="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="M">Male</option>
+                            <option value="F">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="educ"><i class="fas fa-graduation-cap"></i> Education Level</label>
+                            <span class="info-tooltip" title="Years of formal education completed"> ℹ </span>
+                        </div>
+                        <input type="number" id="educ" required min="0" max="30">
+                    </div>
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="ses"><i class="fas fa-chart-line"></i> Socioeconomic Status (1-5)</label>
+                            <span class="info-tooltip" title="1 = Low to 5 = High socioeconomic status"> ℹ </span>
+                        </div>
+                        <input type="number" id="ses" required min="1" max="5">
+                    </div>
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="mmse"><i class="fas fa-brain"></i> MMSE Score (0-30)</label>
+                            <span class="info-tooltip" title="Mini-Mental State Examination score"> ℹ </span>
+                        </div>
+                        <input type="number" id="mmse" required min="0" max="30">
+                    </div>
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="etiv"><i class="fas fa-expand-arrows-alt"></i> eTIV [Estimated Total Intracranial Volume (brain size)]</label>
+                            <span class="info-tooltip" title="Estimated Total Intracranial Volume (brain size)"> ℹ </span>
+                        </div>
+                        <input type="number" id="etiv" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="nwbv"><i class="fas fa-weight"></i> nWBV [Normalized Whole Brain Volume (brain shrinkage measure)]</label>
+                            <span class="info-tooltip" title="Normalized Whole Brain Volume (brain shrinkage measure)">ℹ</span>
+                        </div>
+                        <input type="number" id="nwbv" step="any" required> 
+                    </div>
+        
+                    <div class="form-group">
+                        <div class="label-wrapper">
+                            <label for="asf"><i class="fas fa-ruler-combined"></i> ASF [Atlas Scaling Factor (brain size relative to standard measurements)]</label>
+                            <span class="info-tooltip" title="Atlas Scaling Factor (brain size relative to standard measurements)">ℹ</span>
+                        </div>
+                        <input type="number" id="asf" step="any" required>
+                    </div>
+                </div>
+                <div style="text-align: center;">
+                    <button type="submit"><i class="fas fa-user-md"></i> Analyze Clinical Data</button>
+                </div>
+            </form>
+
+            <div id="result" class="result-container" style="margin-top: 2rem;">
+                <h3>Results Explanation</h3>
+                <div id="analysisResults"></div>
+            </div>
+        </div>
+        <div style="text-align: center; margin-top: 1rem;">
+            <button onclick="generateReport()" class="btn-primary">
+                <i class="fas fa-print"></i> Generate & Print Report
+            </button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 NeuroCare Diagnostics. All rights reserved.</p>
+        <p>Medical AI Diagnostic System - v1.0</p>
+    </footer>
+
+    <script>
+        document.getElementById('clinicalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const data = {
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                educ: document.getElementById('educ').value,
+                ses: document.getElementById('ses').value,
+                mmse: document.getElementById('mmse').value,
+                etiv: document.getElementById('etiv').value,
+                nwbv: document.getElementById('nwbv').value,
+                asf: document.getElementById('asf').value
+            };
+
+            // Show loading state
+            document.getElementById('analysisResults').innerHTML = `
+                <div class="loading" style="text-align: center; padding: 2rem;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <p>Analyzing clinical data... Please wait</p>
+                </div>
+            `;
+
+            fetch('/predict/clinical', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                const resultDiv = document.getElementById('analysisResults');
+                if (result.error) {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> ${result.error}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="result-header">
+                            <div class="result-title">Analysis Results</div>
+                            <div class="result-icon"><i class="fas fa-stethoscope"></i></div>
+                        </div>
+                        <div class="prediction-card">
+                            <h3>Patient Status: ${result.prediction}</h3>
+                            <div class="explanation-box">
+                                <h4>What This Means</h4>
+                                <p>${getExplanation(result.prediction)}</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        function getExplanation(prediction) {
+            if (prediction === "Non-Demented") {
+                return "The analysis suggests no significant signs of dementia based on the clinical data provided. This is considered a normal pattern for someone of this age and background.";
+            } else {
+                return "The analysis found patterns in the data that suggest dementia. This could mean memory problems that are affecting daily life. Further testing is usually recommended to confirm the diagnosis.";
+            }
+        }
+
+        function generateReport() {
+        const analysisResults = document.getElementById('analysisResults').innerHTML;
+        
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Clinical Diagnosis Report</title>
+                <style>
+                    body {
+                        font-family: monospace;
+                        color: black;
+                        background: white;
+                        padding: 2rem;
+                    }
+                    .report-header {
+                        text-align: center;
+                        margin-bottom: 2rem;
+                        border-bottom: 2px solid #000;
+                        padding-bottom: 1rem;
+                    }
+                    .doctor-remarks {
+                        margin-top: 2rem;
+                        padding-top: 1rem;
+                        border-top: 1px dashed #000;
+                    }
+                    @media print {
+                        @page { margin: 0.5cm; }
+                        body { font-size: 12pt; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="report-header">
+                    <h1>NeuroCare Diagnostics</h1>
+                    <h2>Clinical Analysis Report</h2>
+                    <p>Date: ${new Date().toLocaleDateString()}</p>
+                </div>
+                
+                <div class="section">
+                    <h3>Analysis Results</h3>
+                    ${analysisResults.replace(/<i class="fas fa-spinner fa-spin".*?<\/p>/gs, '')}
+                </div>
+                
+                <div class="doctor-remarks">
+                    <h3>Doctor's Remarks</h3>
+                    <p>________________________________________________________________________</p>
+                    <p>________________________________________________________________________</p>
+                    <p>________________________________________________________________________</p>
+                </div>
+                
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        window.onafterprint = function() {
+                            window.close();
+                        };
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+    </script>
+</body>
+</html>
